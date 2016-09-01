@@ -1,0 +1,143 @@
+---
+title: "Stat 450"
+author: "R Assignment 1"
+date: "Due Thursday, September 1 by 5pm on your GitHub repositories"
+output: pdf_document
+---
+
+**Instructions:** The entirety of this assignment must be submitted as an R Markdown file (.Rmd) on your GitHub repository.  Use the .Rmd note handout files and the R Markdown cheat sheet as guidelines.  You are encouraged to save this HW1.Rmd file and fill in the questions with your answers, then submit.  **I should be able to knit your .Rmd file and compile your code myself, so make sure you do some bug checks before submitting!** (I.e., knit the document yourself a couple times and search for errors.)
+
+Consider Example 2 in the notes.  2 dice are rolled, one red and one white.  Let $Y$ be the random variable that denotes the maximum value of the two rolls.  We will use simulation to find the mean and variance of $Y$, and then verify that our simulated results match what we would expect theoretically.
+
+**Theoretical section**
+
+1. (3pts) Define the pmf, find $\mu = E(Y)$, $\sigma^2 = Var(Y)$, and $\sigma = SD(Y)$.  Show all your work.
+```{r}
+  options(stringsAsFactors = FALSE)
+Y_pmf <- data.frame(matrix(c(1,2,3,4,5,6,
+                             1/36,3/36,5/36,7/36,9/36,11/36,
+                             1/36,1/6,5/12,7/9,5/4,11/6,
+                             1/36,1/3,5/4,28/9,25/4,11),ncol=4))
+  colnames(Y_pmf) <- c('Y','PY','YPY','Y2PY')
+Y_pmf
+```
+$$
+\mu = \sum_y yp(y)
+$$
+```{r}
+mu <- sum(Y_pmf$YPY)
+mu
+```
+```{r}
+Variance <- sum(Y_pmf$Y2PY) - (mu^2)
+Variance
+```
+```{r}
+SD <- sqrt(Variance)
+SD
+```
+
+2. (2pts)  Use `ggplot()` to plot the pmf; see Handout 1 notes for an example.
+```{r}
+y <- Y_pmf$Y
+py <- Y_pmf$PY
+dd <- data.frame(y=y,probs = py)
+library(ggplot2)
+ggplot(aes(x=y,y=probs),data=dd) + geom_bar(stat='identity') + 
+  ylab('P(Y=y)') + ggtitle('pmf of Y')
+```
+
+
+3. (2pts)  Consider the random variable $Z=2Y+1$.  What is $E(Z)$ and $Var(Z)$?  Show all work.
+```{r}
+  options(stringsAsFactors = FALSE)
+Z_pmf <- data.frame(matrix(c(3,5,7,9,11,13,
+                             1/36,3/36,5/36,7/36,9/36,11/36,
+                             1/12,5/12,35/36,7/4,11/4,143/36,
+                             1/4,25/12,245/36,63/4,121/4,1859/36),ncol=4))
+  colnames(Z_pmf) <- c('Z','PZ','ZPZ','Z2PZ')
+Z_pmf
+```
+```{r}
+mu.Z <- sum(Z_pmf$ZPZ)
+mu.Z
+```
+```{r}
+Variance.Z <- sum(Z_pmf$Z2PZ) - (mu.Z^2)
+Variance.Z
+```
+
+
+**Simulation section**  
+
+
+Write a function called `one.Y` that simulates rolling two dice and returns the maximum roll.  Try the function out a few times and include the results of these test-runs in your R Markdown output. I have written some code below to get you started; each line of "pseudo-code" should be repaced with actual code:
+
+```{r,eval=TRUE}
+set.seed(1234)
+one.Y <- function() {
+  dice <- c(1,2,3,4,5,6)
+  red_dice <- sample(dice,1)
+  white_dice <- sample(dice,1)
+  maximum_roll <- max(red_dice,white_dice)
+  return(maximum_roll)
+}
+one.Y()
+```
+Each of the following can be answered with 1-2 lines of R code (and corresponding output, of course)
+
+4. (2pts) Use `replicate()` to simulate the results of 1000 pairs of rolls.  These are 1000 realizations of the random variable $Y$. Save the 1000 realizations in an object called `many.Y`.
+```{r}
+many.Y <- replicate(1000,one.Y())
+many.Y
+```
+5.  (2pts) Use `ggplot()` to create the empirical (i.e., observed) pmf of your simulation.  See Handout 1 for example R code.  How does it compare with your theoretical pmf?
+```{r}
+df <- data.frame(x=as.factor(many.Y))
+ggplot(aes(x=as.factor(many.Y)),data=df) + geom_bar(aes(y=(..count..)/(sum(..count..)))) +
+  ylab('Observed proportion') + xlab('y') + ggtitle('Simulated pmf')
+```
+6. (1pt)  What is the mean of the 1000 realizations?
+```{r}
+mu <- mean(many.Y)
+mu
+```
+7. (1pt)  What is the variance of the 1000 realizations?
+```{r}
+Variance <- var(many.Y)
+Variance
+```
+8.  (1pt) What is the standard deviation of the 1000 realizations?
+```{r}
+stand <- sd(many.Y)
+stand
+```
+9. (1pt)  Create a new object called `many.Z` that creates 1000 realizations of $Z$.
+```{r}
+set.seed(1234)
+one.z <- function() {
+  dice <- c(1,2,3,4,5,6)
+  red_dice <- sample(dice,1)
+  white_dice <- sample(dice,1)
+  maximum_roll <- max(red_dice,white_dice)
+  return(2*maximum_roll+1)
+}
+one.z()
+
+many.Z <- replicate(1000,one.z())
+many.Z
+df.Z <- data.frame(x=as.factor(many.Z))
+```
+10. (1pt)  What is the mean of $Z$?
+```{r}
+mu <- mean(many.Z)
+mu
+```
+11. (1pt)  What is the variance of $Z$?
+```{r}
+variance.z <- var(many.Z)
+variance.z
+```
+12. (1pt) Note that your simulated results should be similar to the theoretical quantities; if they aren't, re-check your R code!  What is the reason for any differences?
+
+**There is no difference between the numbers (at least not anything dramatic). There could be differnce because the simulated one could (by a very small chance) end up with a bunch of the same roll (i.e rolls 900 6's) althought the odds of that are very small it is still possible so thiis could ultimatly effect the mean of the rolls. This could explain for number differences. Simplified, the rolls will not be perfect about a fair distribution of all roll values represented so there is room for slight variation in the values.**
