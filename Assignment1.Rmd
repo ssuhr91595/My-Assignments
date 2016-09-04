@@ -4,7 +4,7 @@ author: "R Assignment 1"
 date: "Due Thursday, September 1 by 5pm on your GitHub repositories"
 output: pdf_document
 ---
-
+Good work overall; see comment below regarding how to create Z.  18/18
 **Instructions:** The entirety of this assignment must be submitted as an R Markdown file (.Rmd) on your GitHub repository.  Use the .Rmd note handout files and the R Markdown cheat sheet as guidelines.  You are encouraged to save this HW1.Rmd file and fill in the questions with your answers, then submit.  **I should be able to knit your .Rmd file and compile your code myself, so make sure you do some bug checks before submitting!** (I.e., knit the document yourself a couple times and search for errors.)
 
 Consider Example 2 in the notes.  2 dice are rolled, one red and one white.  Let $Y$ be the random variable that denotes the maximum value of the two rolls.  We will use simulation to find the mean and variance of $Y$, and then verify that our simulated results match what we would expect theoretically.
@@ -128,6 +128,7 @@ many.Z <- replicate(1000,one.z())
 many.Z
 df.Z <- data.frame(x=as.factor(many.Z))
 ```
+Didn't need to write new function; could just use Z <- 2*Y+1
 10. (1pt)  What is the mean of $Z$?
 ```{r}
 mu <- mean(many.Z)
